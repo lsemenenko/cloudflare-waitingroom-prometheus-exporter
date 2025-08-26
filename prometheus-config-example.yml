@@ -1,0 +1,43 @@
+# Example Prometheus configuration for scraping Cloudflare Waiting Room metrics
+# Add this to your prometheus.yml file
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  # Cloudflare Waiting Room Exporter
+  - job_name: 'cloudflare-waitingroom'
+    static_configs:
+      - targets: ['localhost:8000']
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    metrics_path: /metrics
+    honor_labels: false
+    
+    # Optional: Add custom labels
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'waitingroom-exporter'
+      - source_labels: []
+        target_label: service
+        replacement: 'cloudflare-waitingroom'
+
+  # If running via Docker with custom port mapping
+  # - job_name: 'cloudflare-waitingroom-docker'
+  #   static_configs:
+  #     - targets: ['host.docker.internal:8000']
+  #   scrape_interval: 30s
+
+  # If running on Kubernetes
+  # - job_name: 'cloudflare-waitingroom-k8s'
+  #   kubernetes_sd_configs:
+  #     - role: pod
+  #   relabel_configs:
+  #     - source_labels: [__meta_kubernetes_pod_label_app]
+  #       action: keep
+  #       regex: waitingroom-exporter
+  #     - source_labels: [__meta_kubernetes_pod_container_port_number]
+  #       action: keep
+  #       regex: 8000
